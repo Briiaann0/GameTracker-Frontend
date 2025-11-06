@@ -22,14 +22,13 @@ const TarjetaJuego = ({ titulo, genero, imagenPortada, completado }) => {
 
                     {completado ? '✅ COMPLETADO' : '⏳ PENDIENTE'}
 
-
                 </div>
             </div>
 
             <div className="tarjeta-acciones">
 
                 <button className="btn-editar">Editar</button>
-                
+
                 <button className="btn-eliminar">Eliminar</button>
             </div>
         </div>
