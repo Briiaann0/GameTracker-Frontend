@@ -1,4 +1,3 @@
-
 function FormularioJuego() {
     
     const esEditar = false; 

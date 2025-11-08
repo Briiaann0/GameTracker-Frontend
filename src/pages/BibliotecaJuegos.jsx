@@ -1,5 +1,3 @@
-// archivo: src/pages/BibliotecaJuegos.jsx
-
 import TarjetaJuego from '../components/TarjetaJuego';
 
 
@@ -14,14 +12,14 @@ function BibliotecaJuegos() {
 
         <div className="biblioteca-container">
 
-            <h1>🎮 Mi Biblioteca</h1>
+             <h1>🎮 Mi Biblioteca</h1>
             <div className="filtros-container">
                 <input type="text" placeholder="Buscar por título o desarrollador" className="filtro-input" />
                 <select className="filtro-select">
                     <option value="">Filtrar por género</option>
                     
-                </select>
-                <button className="btn-agregar">➕ Agregar Nuevo Juego</button>
+                 </select>
+            <button className="btn-agregar">➕ Agregar Nuevo Juego</button>
             </div>
 
 
@@ -37,6 +35,7 @@ function BibliotecaJuegos() {
                     />
                 ))}
             </div>
+       
         </div>
     );
 }
