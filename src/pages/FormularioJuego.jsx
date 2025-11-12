@@ -1,8 +1,9 @@
 import { useState } from 'react';
+import { crearJuego } from '../api/juegosAPI';
 
 function FormularioJuego() {
-    
-    
+
+ 
     const [juego, setJuego] = useState({
         titulo: '',
         desarrollador: '',
@@ -29,12 +30,20 @@ function FormularioJuego() {
     };
 
     
-    const handleSubmit = (e) => {
-        e.preventDefault(); 
-
+   const handleSubmit = async (e) => {
+            e.preventDefault(); 
         
-        console.log('Datos listos para enviar:', juego); 
-           alert(`Juego a enviar (por ahora solo en consola): ${juego.titulo}`);
+        try {
+            await crearJuego(juego);
+            
+            console.log('Juego creado con éxito.');
+        
+            navigate('/'); 
+
+        } catch (error) {
+ alert(`No se pudo agregar el juego. Revisa los datos y que el Backend esté corriendoo`);
+       
+            }
     };
     
     return (
