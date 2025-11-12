@@ -1,6 +1,5 @@
-import TarjetaJuego from '../components/TarjetaJuego';
+import TarjetaJuego from '../components/TarjetaJuego'; 
 import { useNavigate } from 'react-router-dom'; 
-
 
 const juegosDePrueba = [
 
@@ -10,19 +9,19 @@ const juegosDePrueba = [
 
 ];
 
+
 function BibliotecaJuegos() {
     
     const navigate = useNavigate();
 
     return (
-
         <div className="biblioteca-container">
-            <h1>🎮 Mi Biblioteca</h1>
+            <h1>🎮 Mi Biblioteca de Videojuegos</h1>
 
-            
+        
             <div className="filtros-container">
-                <input type="text" placeholder="Buscar por título o desarrollador" className="filtro-input" />
-               
+
+            <input type="text" placeholder="Buscar por título o desarrollador" className="filtro-input" />     
                 <select className="filtro-select">
                     <option value="">Filtrar por género</option>
                 </select>
@@ -30,15 +29,16 @@ function BibliotecaJuegos() {
                 <button 
                     className="btn-agregar"
                     onClick={() => navigate('/agregar')} 
-                >
 
+                >
                     ➕ Agregar Nuevo Juego
                 </button>
 
             </div>
 
             
-            <div className="juegos-grid">
+            <div  className="juegos-grid">
+
                 {juegosDePrueba.map(juego => (
 
                     <TarjetaJuego
@@ -48,11 +48,10 @@ function BibliotecaJuegos() {
                         imagenPortada={juego.imagenPortada}
                         completado={juego.completado}
                         onEdit={() => navigate(`/editar/${juego.id}`)} 
-
                     />
+
                 ))}
             </div>
-            
         </div>
     );
 }

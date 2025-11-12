@@ -1,37 +1,40 @@
-
 const TarjetaJuego = ({ titulo, genero, imagenPortada, completado, onEdit }) => {
 
-return (
+    return (
 
-    <div className="tarjeta-juego">
+        <div className="tarjeta-juego">
+
             <img 
                 src={imagenPortada || 'placeholder.jpg'} 
                 alt={`Portada de ${titulo}`} 
                 className="tarjeta-imagen" 
             />
 
-            <div className="tarjeta-info">
-                <h3 className="tarjeta-titulo">{titulo || "Título del Juego"}</h3>
-                <p className="tarjeta-genero">Género: {genero || "Acción/RPG"}</p>
-               
-                <div className={`tarjeta-estado ${completado ? 'completo' : 'pendiente'}`}>
-                    {completado ? '✅ COMPLETADO' : '⏳ PENDIENTE'}
-                </div>
 
+            <div className="tarjeta-info">
+
+                <h3 className="tarjeta-titulo">{titulo || "Título del Juego"}</h3>
+
+                <p className="tarjeta-genero">Género: {genero || "Acción/RPG"}</p>
+
+                <div className= {`tarjeta-estado ${completado ? 'completo' : 'pendiente'}`}>
+                   
+                    {completado ? '✅ COMPLETADO' : '⏳ PENDIENTE'}
+                
+                </div>
+            
+            </div>
+            
+
+
+            <div className="tarjeta-acciones">
+               
+                <button className="btn-editar" onClick={onEdit}> Editar </button>
+                <button className="btn-eliminar"> Eliminar </button>
             </div>
 
-                <div className="tarjeta-acciones">
-                
-                 <button className="btn-editar" onClick={onEdit}>Editar</button>
-                 <button className="btn-eliminar">Eliminar</button>
-           
-                </div>
-
-
-    </div>
- );
-
-
+        </div>
+    );
 }
 
 export default TarjetaJuego;
