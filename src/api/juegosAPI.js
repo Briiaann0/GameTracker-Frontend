@@ -29,4 +29,24 @@ export const crearJuego = async (juegoData) => {
         console.error('Error en la petición POST:', error.message);
         throw error;
     }
+
+ };
+
+    export const obtenerJuegos = async () => {
+        
+    try {
+         const response = await fetch(BASE_URL);
+
+        if (!response.ok) {
+
+        throw new Error(`Error al obtener los juegos: ${response.statusText}`);  }
+
+        return await response.json(); 
+
+    } catch (error) 
+    {
+
+        console.error('Error en la petición GET:', error.message);
+        throw error;
+    }
 };

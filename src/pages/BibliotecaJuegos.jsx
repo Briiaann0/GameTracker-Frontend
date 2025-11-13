@@ -1,59 +1,79 @@
-import TarjetaJuego from '../components/TarjetaJuego'; 
+import { useState, useEffect } from 'react'; 
 import { useNavigate } from 'react-router-dom'; 
-
-const juegosDePrueba = [
-
-    { id: 1, titulo: "Cyberpunk 2077", genero: "RPG/Acción", imagenPortada: "https://via.placeholder.com/200x300?text=CP2077", completado: false },
-    { id: 2, titulo: "Elden Ring", genero: "RPG", imagenPortada: "https://via.placeholder.com/200x300?text=Elden+Ring", completado: true },
-    { id: 3, titulo: "Disco Elysium", genero: "RPG/Misterio", imagenPortada: "https://via.placeholder.com/200x300?text=Disco+E", completado: true },
-
-];
+import TarjetaJuego from '../components/TarjetaJuego'; 
+import { obtenerJuegos } from '../api/juegosAPI'; 
 
 
 function BibliotecaJuegos() {
-    
+
     const navigate = useNavigate();
+    const [juegos, setJuegos] = useState([]); 
+    const [cargando, setCargando] = useState(true); 
+
+    useEffect( () =>  {
+        const cargarJuegos = async () => {
+
+              try {
+                const juegosAPI = await obtenerJuegos(); 
+                setJuegos(juegosAPI); 
+                setCargando(false);
+            } 
+
+            catch (error) {
+                console.error("Error al cargar juegos:", error);
+                setCargando(false);
+            }
+        };
+
+        cargarJuegos(); 
+
+    }, []); 
+
+    if (cargando) {
+
+        return <h2 className="loading-message">Cargando biblioteca</h2>;
+    }
 
     return (
         <div className="biblioteca-container">
-            <h1>🎮 Mi Biblioteca de Videojuegos</h1>
+           
+            <h1>🎮 Mi Biblioteca de Videojuegos ({juegos.length} juegos)</h1>
 
-        
             <div className="filtros-container">
-
-            <input type="text" placeholder="Buscar por título o desarrollador" className="filtro-input" />     
+               
+                <input type="text" placeholder="Buscar por título o desarrollador" className="filtro-input" />
+               
                 <select className="filtro-select">
                     <option value="">Filtrar por género</option>
                 </select>
-                
-                <button 
-                    className="btn-agregar"
-                    onClick={() => navigate('/agregar')} 
+               
+                <button className="btn-agregar" onClick={() => navigate('/agregar')}  >
+                    ➕ Agregar Nuevo Juego  </button>
+             </div>
 
-                >
-                    ➕ Agregar Nuevo Juego
-                </button>
+            {juegos.length === 0 && (
+                 <p className="mensaje-vacio">Aún no hay juegos en tu biblioteca. ¡¡¡Agrega el primero!!!</p>
+            )}
 
-            </div>
-
+        <div className="juegos-grid">
             
-            <div  className="juegos-grid">
-
-                {juegosDePrueba.map(juego => (
+                {juegos.map(juego => (
 
                     <TarjetaJuego
-                        key={juego.id} 
+
+                        key={juego._id}
                         titulo={juego.titulo}
                         genero={juego.genero}
                         imagenPortada={juego.imagenPortada}
                         completado={juego.completado}
-                        onEdit={() => navigate(`/editar/${juego.id}`)} 
-                    />
-
-                ))}
+                        onEdit={() => navigate(`/editar/${juego._id}`)} 
+                
+                        />
+            ))}
             </div>
         </div>
     );
 }
+
 
 export default BibliotecaJuegos;
