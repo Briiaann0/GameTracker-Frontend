@@ -1,9 +1,17 @@
-import { useState } from 'react';
-import { crearJuego } from '../api/juegosAPI';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom'; 
+import { crearJuego, obtenerJuegoPorId, actualizarJuego } from '../api/juegosAPI'; 
+
 
 function FormularioJuego() {
 
- 
+    const navigate = useNavigate();
+    const { id } = useParams(); 
+    
+   
+    const esEditar = !!id; 
+
+    
     const [juego, setJuego] = useState({
         titulo: '',
         desarrollador: '',
@@ -11,51 +19,77 @@ function FormularioJuego() {
         añoLanzamiento: '',
         imagenPortada: '',
         completado: false
-    
     });
-    
-    const esEditar = false; 
+
 
     
+    useEffect(() => {
+        if (esEditar) {
+            const cargarJuego = async () => {
+                try {
+                    const juegoEncontrado = await obtenerJuegoPorId(id);
+                    setJuego({
+                        ...juegoEncontrado,
+                       
+                        añoLanzamiento: String(juegoEncontrado.añoLanzamiento) 
+                    });
+                } catch (error) {
+                    console.error("Error al cargar juego para edición:", error);
+                   
+                    navigate('/'); 
+                }
+            };
+            cargarJuego();
+        }
+    }, [id, esEditar, navigate]); 
+
+
     const handleChange = (e) => {
         
         const { name, value, type, checked } = e.target;
         
         setJuego({
             ...juego,
-
             [name]: type === 'checkbox' ? checked : value
-            
         });
     };
 
     
-   const handleSubmit = async (e) => {
-            e.preventDefault(); 
+    
+    const handleSubmit = async (e) => {
+        e.preventDefault(); 
         
         try {
-            await crearJuego(juego);
+            if (esEditar) {
+                
+                await actualizarJuego(id, juego); 
+                console.log('Juego actualizado con éxito.');
+            } else {
+                
+                await crearJuego(juego);
+                console.log('Juego creado con éxito.');
+            }
             
-            console.log('Juego creado con éxito.');
-        
+            
             navigate('/'); 
 
         } catch (error) {
- alert(`No se pudo agregar el juego. Revisa los datos y que el Backend esté corriendoo`);
-       
-            }
+            console.error("Error al guardar el juego:", error);
+            alert(`No se pudo ${esEditar ? 'actualizar' : 'agregar'} el juego. Revisa los datos y que el Backend esté corriendo.`);
+        }
     };
     
     return (
         <div className="formulario-container">
+            
            
             <h2>{esEditar ? '🛠️ Editar Juego' : '➕ Agregar Nuevo Juego'}</h2>
             
-            
             <form className="juego-form" onSubmit={handleSubmit}>
                 
+               
                 
-                  <div className="form-group">
+                <div className="form-group">
                     <label htmlFor="titulo">Título del Juego:</label>
                     <input 
                         type="text" 
@@ -72,7 +106,6 @@ function FormularioJuego() {
                 <div className="form-group">
                 <label htmlFor="desarrollador">Desarrollador:</label>
                     <input 
-
                         type="text" 
                         id="desarrollador" 
                         name="desarrollador" 
@@ -83,7 +116,7 @@ function FormularioJuego() {
                     />
                 </div>
                 
-               
+                
                 <div className="form-group">
                     <label htmlFor="genero">Género Principal:</label>
                     <select 
@@ -98,12 +131,12 @@ function FormularioJuego() {
                         <option value="Accion">Acción</option>
                         <option value="Aventura">Aventura</option>
                         <option value="Terror">Terror</option>
+                        <option value="Otro">Otro</option>
                     </select>
                 </div>
                 
-               
+                
                 <div className="form-group">
-
                 <label htmlFor="añoLanzamiento">Año de Lanzamiento:</label>
                     <input 
                         type="number" 
@@ -113,10 +146,9 @@ function FormularioJuego() {
                         value={juego.añoLanzamiento}
                         onChange={handleChange}
                     />
-
                 </div>
                 
-               
+                
                 <div className="form-group">
                     <label htmlFor="imagenPortada">URL Imagen de Portada:</label>
                     <input 
@@ -130,7 +162,7 @@ function FormularioJuego() {
                 </div>
 
                 
-                 <div className="form-group checkbox-group">
+                <div className="form-group checkbox-group">
                     <input 
                         type="checkbox" 
                         id="completado" 
@@ -140,14 +172,12 @@ function FormularioJuego() {
                     />
 
                     <label htmlFor="completado">Juego Completado</label>
-
                 </div>
 
-               
+                
                 <button type="submit" className="btn-submit">
-
-                {esEditar ? 'Guardar Cambios' : 'Agregar Juego a Biblioteca'}
-
+                
+                    {esEditar ? '💾 Guardar Cambios' : '➕ Agregar Juego a Biblioteca'}
                 </button>
                 
             </form>

@@ -33,7 +33,7 @@ export const crearJuego = async (juegoData) => {
  };
 
     export const obtenerJuegos = async () => {
-        
+
     try {
          const response = await fetch(BASE_URL);
 
@@ -48,5 +48,61 @@ export const crearJuego = async (juegoData) => {
 
         console.error('Error en la petición GET:', error.message);
         throw error;
+    }
+};
+
+export const actualizarJuego = async (id, juegoData) => {
+    try {
+        const response = await fetch(`${BASE_URL}/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(juegoData),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error al actualizar el juego: ${response.statusText}`);
+        }
+
+        return await response.json(); 
+
+    } catch (error) {
+        console.error('Error en la petición PUT:', error.message);
+        throw error;
+    }
+};
+
+
+export const eliminarJuego = async (id) => {
+    try {
+        const response = await fetch(`${BASE_URL}/${id}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error al eliminar el juego: ${response.statusText}`);
+        }
+        
+        
+        return true; 
+
+    } catch (error) {
+        console.error('Error en la petición Borrar:', error.message);
+        throw error;
+    }
+};
+
+export const obtenerJuegoPorId = async (id) => {
+ try {
+ const response = await fetch(`${BASE_URL}/${id}`);
+         
+    if (!response.ok) {
+             throw new Error(`Error al obtener el juego por ID: ${response.statusText}`);
+        }
+
+        return await response.json();
+
+    } catch (error) { console.error('Error en la petición GET por ID:', error.message); throw error;
     }
 };
