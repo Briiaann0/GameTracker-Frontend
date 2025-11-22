@@ -1,64 +1,81 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom'; 
-import { eliminarJuego } from '../api/juegosAPI';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import PuntuacionEstrellas from './PuntuacionEstrellas'; 
 
 
-const TarjetaJuego = ({ juego, onJuegoEliminado }) => {
-    
-    
-    const { _id, titulo, desarrollador, genero, imagenPortada, completado } = juego;
+function TarjetaJuego({ juego, onEliminar }) {
+
     const navigate = useNavigate();
+    const [menuAbierto, setMenuAbierto] = useState(false);
+
+    const handleVerDetalle = () => {
+        navigate(`/juego/${juego._id}`);
+     
+    };
 
     
-    const handleEliminar = async () => {
-      if (window.confirm(`¿Estás seguro de que quieres eliminar el juego "${titulo}"?`)) {
-             try {
-                await eliminarJuego(_id);
+    const toggleMenu = (e) => {
+        e.stopPropagation();
+         setMenuAbierto(prev => !prev);
+     };
 
-                  onJuegoEliminado(); 
+    const handleEditar = (e) => {
+          e.stopPropagation();
+        setMenuAbierto(false);
+         navigate(`/editar/${juego._id}`);
 
-            } catch (error) {
-                console.error("Error al eliminar el juego:", error);
-                 alert("Hubo un error al eliminar el juego.");
-            }
-        }
     };
-    
 
-    const handleEditar = () => {
-        
-        navigate(`/editar/${_id}`); 
+    const handleEliminar = (e) => {
+        e.stopPropagation();
+        setMenuAbierto(false);
+        if (window.confirm(`¿Estás seguro de eliminar "${juego.titulo}"?`)) { 
+            onEliminar(juego._id);
+         }
     };
+
+
+
+    const puntuacionNumerica = parseFloat(juego.puntuacion) || 0;
+
+
 
     return (
-           <div className="tarjeta-juego">
+        <div className="tarjeta-juego">
+            
+            <div onClick={handleVerDetalle}> 
+                <div className="tarjeta-imagen-contenedor">
+                    <img 
+                        src={juego.imagenPortada || 'https://via.placeholder.com/300x400/1e1e1e/a0a0a0?text=SIN+IMAGEN'} 
+                        alt={juego.titulo} 
+                        className="tarjeta-imagen" />
 
-            <img 
-                src={imagenPortada || 'placeholder.jpg'} 
-                alt={`Portada de ${titulo}`} 
-                className="tarjeta-imagen"   />
-
-            <div className="tarjeta-info">
-
-            <h3 className="tarjeta-titulo">{titulo || "Título del Juego"}</h3>
-                 <p className="tarjeta-desarrollador">Desarrollador: {desarrollador}</p>
-                <p className="tarjeta-genero">Género: {genero || "Acción/RPG"}</p>
-
-                <div className= {`tarjeta-estado ${completado ? 'completo' : 'pendiente'}`}>
-                    {completado ? '✅ COMPLETADO' : '⏳ PENDIENTE'}
                 </div>
-            
-            </div>
-            
-            <div className="tarjeta-acciones">
-                
-                
-                <button className="btn-editar" onClick={handleEditar}> ✏️ Editar </button>
-                
-                <button className="btn-eliminar" onClick={handleEliminar}> 🗑️ Eliminar </button>
-            
+
+                <div className="tarjeta-info">
+                    <h3 className="tarjeta-titulo">{juego.titulo}</h3>
+                    <PuntuacionEstrellas puntuacion={puntuacionNumerica} /> 
+                </div>
+
             </div>
 
+            <button className="btn-kebab" onClick={toggleMenu}>
+                <div className="dot"></div>
+                <div className="dot"></div>
+                <div className="dot"></div>
+            </button>
+
+            {menuAbierto && (
+                <div className="menu-desplegable">
+                <button onClick={handleEditar}>Editar</button> 
+                    <button 
+                        onClick={handleEliminar} 
+                        className="btn-eliminar-menu"
+                    >
+                        Eliminar
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

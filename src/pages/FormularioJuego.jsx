@@ -1,131 +1,119 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom'; 
-import { crearJuego, obtenerJuegoPorId, actualizarJuego } from '../api/juegosAPI'; 
+import { useParams, useNavigate } from 'react-router-dom';
+import { obtenerJuegoPorId, guardarJuego } from '../api/juegosAPI'; 
 
+const initialState = {
+    titulo: '',
+    desarrollador: '',
+    genero: '',
+    lanzamiento: new Date().getFullYear().toString(),
+    imagenPortada: '',
+    horasJugadas: 0,
+    puntuacion: 0,
+    completado: false,
+};
 
 function FormularioJuego() {
-
-    const navigate = useNavigate();
     const { id } = useParams(); 
-    
-   
-    const esEditar = !!id; 
+    const navigate = useNavigate();
 
+    const [juego, setJuego] = useState(initialState);
+    const [cargando, setCargando] = useState(false);
+    const [error, setError] = useState(null);
     
-    const [juego, setJuego] = useState({
-        titulo: '',
-        desarrollador: '',
-        genero: '',
-        añoLanzamiento: '',
-        imagenPortada: '',
-        completado: false
-    });
+    const esEdicion = !!id; 
 
-
-    
     useEffect(() => {
-        if (esEditar) {
+       
+        if (esEdicion) {
+        setCargando(true);
             const cargarJuego = async () => {
                 try {
-                    const juegoEncontrado = await obtenerJuegoPorId(id);
+                    const data = await obtenerJuegoPorId(id);
                     setJuego({
-                        ...juegoEncontrado,
-                       
-                        añoLanzamiento: String(juegoEncontrado.añoLanzamiento) 
+                        ...data,
+                        imagenPortada: data.imagenPortada || '', 
+                        lanzamiento: data.lanzamiento ? data.lanzamiento.toString() : '',
+                        horasJugadas: data.horasJugadas ? data.horasJugadas.toString() : '0',
+                        puntuacion: data.puntuacion ? data.puntuacion.toString() : '0',
                     });
-                } catch (error) {
-                    console.error("Error al cargar juego para edición:", error);
-                   
-                    navigate('/'); 
+                } catch (err) {
+                    setError('Error al cargar los datos del juego.');
+                    console.error('Error al cargar el juego:', err);
+                } finally {
+                    setCargando(false);
+               
                 }
             };
             cargarJuego();
+        } else {
+            setJuego(initialState);
+       
         }
-    }, [id, esEditar, navigate]); 
-
+    }, [id, esEdicion]);
 
     const handleChange = (e) => {
-        
         const { name, value, type, checked } = e.target;
-        
-        setJuego({
-            ...juego,
-            [name]: type === 'checkbox' ? checked : value
-        });
+        setJuego(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value,
+        }));
     };
 
-    
-    
     const handleSubmit = async (e) => {
-        e.preventDefault(); 
-        
-        try {
-            if (esEditar) {
-                
-                await actualizarJuego(id, juego); 
-                console.log('Juego actualizado con éxito.');
-            } else {
-                
-                await crearJuego(juego);
-                console.log('Juego creado con éxito.');
-            }
-            
-            
-            navigate('/'); 
+        e.preventDefault();
+        setCargando(true);
+        setError(null);
 
-        } catch (error) {
-            console.error("Error al guardar el juego:", error);
-            alert(`No se pudo ${esEditar ? 'actualizar' : 'agregar'} el juego. Revisa los datos y que el Backend esté corriendo.`);
+        const juegoAEnviar = {
+            ...juego,
+            horasJugadas: parseInt(juego.horasJugadas, 10) || 0,
+            puntuacion: parseInt(juego.puntuacion, 10) || 0,
+            lanzamiento: parseInt(juego.lanzamiento, 10) || null,
+            
+        };
+        
+       
+
+        try {
+            await guardarJuego(juegoAEnviar, id); 
+            navigate('/'); 
+        } catch (err) {
+            setError('Error al guardar el juego. Verifica los datos y la conexión.');
+            console.error('Error al guardar el juego:', err);
+        } finally {
+            setCargando(false);
         }
     };
-    
+
+    if (cargando && esEdicion) {
+        return <h2 style={{ textAlign: 'center', marginTop: '100px', color: '#a0a0a0' }}>Cargando datos...</h2>;
+    }
+
     return (
-        <div className="formulario-container">
+        <div className="contenedor-principal">
             
-           
-            <h2>{esEditar ? '🛠️ Editar Juego' : '➕ Agregar Nuevo Juego'}</h2>
-            
-            <form className="juego-form" onSubmit={handleSubmit}>
+            <h1 className="titulo-principal-formulario">
+                {esEdicion ? `Editar: ${juego.titulo}` : 'Agregar'}
+            </h1>
+
+            <form onSubmit={handleSubmit} className="formulario-juego">
                 
-               
+                {error && <p className="mensaje-error">{error}</p>}
                 
-                <div className="form-group">
+                <div className="campo-formulario">
                     <label htmlFor="titulo">Título del Juego:</label>
-                    <input 
-                        type="text" 
-                        id="titulo" 
-                        name="titulo" 
-                        placeholder="Ej: The Legend of Zelda" 
-                        required 
-                        value={juego.titulo} 
-                        onChange={handleChange} 
-                    />
+                    <input type="text" id="titulo" name="titulo" value={juego.titulo} onChange={handleChange} required />
                 </div>
-                
-                
-                <div className="form-group">
-                <label htmlFor="desarrollador">Desarrollador:</label>
-                    <input 
-                        type="text" 
-                        id="desarrollador" 
-                        name="desarrollador" 
-                        placeholder="Ej: Nintendo" 
-                        required 
-                        value={juego.desarrollador}
-                        onChange={handleChange}
-                    />
+
+                <div className="campo-formulario">
+                    <label htmlFor="desarrollador">Desarrollador:</label>
+                    <input type="text" id="desarrollador" name="desarrollador" value={juego.desarrollador} onChange={handleChange} required />
                 </div>
-                
-                
-                <div className="form-group">
+
+                <div className="campo-formulario">
                     <label htmlFor="genero">Género Principal:</label>
-                    <select 
-                        id="genero" 
-                        name="genero" 
-                        required
-                        value={juego.genero}
-                        onChange={handleChange}
-                    >
+                    <select id="genero" name="genero" value={juego.genero} onChange={handleChange} required>
                         <option value="">Selecciona un género</option>
                         <option value="RPG">RPG</option>
                         <option value="Accion">Acción</option>
@@ -134,50 +122,39 @@ function FormularioJuego() {
                         <option value="Otro">Otro</option>
                     </select>
                 </div>
-                
-                
-                <div className="form-group">
-                <label htmlFor="añoLanzamiento">Año de Lanzamiento:</label>
-                    <input 
-                        type="number" 
-                        id="añoLanzamiento" 
-                        name="añoLanzamiento" 
-                        placeholder="Ej: 2023" 
-                        value={juego.añoLanzamiento}
-                        onChange={handleChange}
-                    />
+
+                <div className="campo-formulario">
+                    <label htmlFor="lanzamiento">Año de Lanzamiento:</label>
+                    <input type="number" id="lanzamiento" name="lanzamiento" value={juego.lanzamiento} onChange={handleChange} min="1950" max={new Date().getFullYear()} />
                 </div>
-                
-                
-                <div className="form-group">
+
+                <div className="campo-formulario">
                     <label htmlFor="imagenPortada">URL Imagen de Portada:</label>
-                    <input 
-                        type="url" 
-                        id="imagenPortada" 
-                        name="imagenPortada" 
-                        placeholder="https://ejemplo.com/portada.jpg" 
-                        value={juego.imagenPortada}
-                        onChange={handleChange}
-                    />
+                    <input type="url" id="imagenPortada" name="imagenPortada" value={juego.imagenPortada} onChange={handleChange} placeholder="https://ejemplo.com/portada.jpg" />
                 </div>
 
-                
-                <div className="form-group checkbox-group">
-                    <input 
-                        type="checkbox" 
-                        id="completado" 
-                        name="completado" 
-                        checked={juego.completado} 
-                        onChange={handleChange}
-                    />
-
-                    <label htmlFor="completado">Juego Completado</label>
+                <div className="campo-formulario">
+                    <label htmlFor="horasJugadas">Horas Jugadas:</label>
+                    <input type="number" id="horasJugadas" name="horasJugadas" value={juego.horasJugadas} onChange={handleChange} min="0" />
                 </div>
 
-                
-                <button type="submit" className="btn-submit">
-                
-                    {esEditar ? '💾 Guardar Cambios' : '➕ Agregar Juego a Biblioteca'}
+                <div className="campo-formulario">
+                    <label htmlFor="puntuacion">Puntuación (0 a 5):</label>
+                    <input type="number" id="puntuacion" name="puntuacion" value={juego.puntuacion} onChange={handleChange} min="0" max="5" />
+                </div>
+
+                <div className="campo-formulario checkbox-container">
+                    <input type="checkbox" id="completado" name="completado" checked={juego.completado} onChange={handleChange} />
+                    <label htmlFor="completado" className="checkbox-label">Juego Completado</label>
+                </div>
+
+                <button type="submit" className="btn-principal" disabled={cargando}>
+                    {cargando 
+                        ? 'Guardando...' 
+                        : esEdicion 
+                            ? 'Guardar Cambios' 
+                            : 'Agregar Juego a Biblioteca'
+                    }
                 </button>
                 
             </form>
